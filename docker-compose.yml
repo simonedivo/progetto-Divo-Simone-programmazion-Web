@@ -1,0 +1,19 @@
+version: "3"
+services:
+  app_Divo_Simone:
+    container_name: app_Divo_Simone
+    build: .
+    command: nodemon --watch . -e js app.js
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app:/var/www
+    links:
+      - "mongo:mongohost"
+  mongo_Divo_Simone:
+    container_name: mongo_Divo_Simone
+    image: mongo:latest
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
