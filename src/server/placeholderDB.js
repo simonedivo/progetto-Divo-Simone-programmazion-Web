@@ -12,11 +12,13 @@ module.exports = {
 
             if (!hasUsers && !hasTransactions) {
                 await client.db().collection('users').insertMany([
-                    {username: '', name: '', surname: '', password: await bcrypt.hash('', 10)},
-                    {username: '', name: '', surname: '', password: await bcrypt.hash('', 10)},
-                    {username: '', name: '', surname: '', password: await bcrypt.hash('', 10)}, 
-                    {username: '', name: '', surname: '', password: await bcrypt.hash('', 10)},
-                    {username: '', name: '', surname: '', password: await bcrypt.hash('', 10)},
+                    {username: 'Solid Snake', name: 'David', surname: 'Hayter', password: await bcrypt.hash('shadowmoses', 10)},
+                    {username: 'Otacon', name: 'Hal', surname: 'Emmerich', password: await bcrypt.hash('metalgear', 10)},
+                    {username: 'Gray Fox', name: 'Frank', surname: 'Jaeger', password: await bcrypt.hash('foxhound', 10)},
+                    {username: 'Dragon of Dojima', name: 'Kiryu', surname: 'Kazuma', password: await bcrypt.hash('tigerdrop', 10)}, 
+                    {username: 'The Fire-Breathing Fist', name: 'Ken', surname: 'Masters', password: await bcrypt.hash('hadouken', 10)},
+                    {username: '1st Class Soldier', name: 'Cloud', surname: 'Strife', password: await bcrypt.hash('777', 10)},
+                    //{username: '', name: '', surname: '', password: await bcrypt.hash('', 10)},
                 ]);
 
                 await client.db().collection('transactions').insertMany([

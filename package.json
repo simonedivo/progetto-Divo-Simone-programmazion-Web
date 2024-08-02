@@ -12,6 +12,7 @@
     "bootstrap": "^5.3.3",
     "bootstrap-vue": "^2.23.1",
     "express": "^4.19.2",
+    "mdb-vue-ui-kit": "^5.0.0",
     "mongodb": "^6.8.0",
     "vue": "^3.4.35",
     "vue-router": "^4.4.2"
