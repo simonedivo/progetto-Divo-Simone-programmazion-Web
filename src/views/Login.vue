@@ -18,10 +18,13 @@
           v-model="password"
           wrapperClass="mb-4"
         />
-        <MDBBtn color="primary" class="mb-2" block> Accedi </MDBBtn>
+        <MDBBtn color="primary" class="mb-2 login-button" block @click="handleLogin"> Accedi </MDBBtn>
         <MDBRow>
           <p>Non sei ancora registrato? <router-link to="/register" class="hover-text" @mouseover="hoverText = 'Registrati ora'" @mouseleave="hoverText = 'Arrangiati'">{{ hoverText }}</router-link></p>
         </MDBRow>
+        <div v-if="errorMessage" class="error-message">
+          <p>{{ errorMessage }}</p>
+        </div>
       </form>
     </div>
 </template>
@@ -33,6 +36,7 @@ import {
   MDBBtn,
 } from "mdb-vue-ui-kit";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 export default {
   name: "Login",
@@ -45,11 +49,42 @@ export default {
     const username = ref("");
     const password = ref("");
     const hoverText = ref("Arrangiati");
+    const errorMessage = ref("");
+    const router = useRouter();
+
+    const handleLogin = async () => {
+      try {
+        console.log('Login attempt', username.value, password.value);
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+          username: username.value,
+          password: password.value,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Login failed');
+        }
+      
+        const data = await response.json();
+        console.log('Login successful', data);
+        errorMessage.value = '';
+        router.push('/home');
+      } catch (error) {
+        errorMessage.value = 'Invalid username or password!';
+      }
+    };
 
     return {
       username,
       password,
       hoverText,
+      handleLogin,
+      errorMessage,
     };
   },
 };
@@ -75,5 +110,14 @@ export default {
     display: inline-block;
     width: 100px;
     text-align: center;
+}
+.login-button {
+    width: 100%;
+    max-width: 100px;
+    height: 40px;
+}
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 </style>

@@ -3,7 +3,7 @@ services:
   app_Divo_Simone:
     container_name: app_Divo_Simone
     build: .
-    command: nodemon --watch . -e js app.js
+    command: nodemon --watch . -e js init.cjs
     ports:
       - "3000:3000"
     volumes:

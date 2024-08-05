@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const db = require('./db.js');
+const bcrypt = require('bcrypt');
+const db = require('./db.cjs');
 
 const secretKey = 'il-sombrero-di-azazel-817';
 
@@ -15,7 +16,7 @@ router.post('/register', async (req, res) => {
     try {
         const client = await db.connect();
 
-        const existingUser = await client.db().collection('users').findOne({ username });
+        const existingUser = await client.collection('users').findOne({ username });
         if (existingUser) {
             return res.status(400).send('User already exists');
         }
@@ -28,7 +29,7 @@ router.post('/register', async (req, res) => {
             surname,
             password: hashedPassword
         };
-        await client.db().collection('users').insertOne(newUser);
+        await client.collection('users').insertOne(newUser);
 
         res.status(201).send('User registered');
     } catch (error) {
@@ -47,7 +48,7 @@ router.post('/login', async (req, res) => {
     try {
         const client = await db.connect();
 
-        const user = await client.db().collection('users').findOne({ username });
+        const user = await client.collection('users').findOne({ username });
         if (!user) {
             return res.status(400).send('Invalid username or password');
         }
@@ -66,3 +67,5 @@ router.post('/login', async (req, res) => {
         res.status(500).send('An error occurred while logging in');
     }
 });
+
+module.exports = router;

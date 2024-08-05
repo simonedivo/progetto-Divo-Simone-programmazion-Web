@@ -1,17 +1,18 @@
-const db = require('./db.js');
+const db = require('./db.cjs');
+const bcrypt = require('bcrypt');
 
 module.exports = {
     initializeDB: async () => {
         try {
             const client = await db.connect();
-            const users = client.db().collection('users').find({});
-            const transactions = client.db().collection('transactions').find({});
+            const users = client.collection('users').find({});
+            const transactions = client.collection('transactions').find({});
 
             const hasUsers = await users.hasNext();
             const hasTransactions = await transactions.hasNext();
 
             if (!hasUsers && !hasTransactions) {
-                await client.db().collection('users').insertMany([
+                await client.collection('users').insertMany([
                     {username: 'Solid Snake', name: 'David', surname: 'Hayter', password: await bcrypt.hash('shadowmoses', 10)},
                     {username: 'Otacon', name: 'Hal', surname: 'Emmerich', password: await bcrypt.hash('metalgear', 10)},
                     {username: 'Gray Fox', name: 'Frank', surname: 'Jaeger', password: await bcrypt.hash('foxhound', 10)},
@@ -21,7 +22,7 @@ module.exports = {
                     //{username: '', name: '', surname: '', password: await bcrypt.hash('', 10)},
                 ]);
 
-                await client.db().collection('transactions').insertMany([
+                await client.collection('transactions').insertMany([
                     {},
                     {},
                     {},
