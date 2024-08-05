@@ -35,7 +35,7 @@ import {
   MDBInput,
   MDBBtn,
 } from "mdb-vue-ui-kit";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 export default {
@@ -57,6 +57,7 @@ export default {
         console.log('Login attempt', username.value, password.value);
         const response = await fetch('http://localhost:3000/api/auth/login', {
           method: 'POST',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -78,6 +79,25 @@ export default {
         errorMessage.value = 'Invalid username or password!';
       }
     };
+
+    const checkAuthentication = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/verifyToken', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          router.push('/home');
+        }
+      } catch (error) {
+        console.error('No token found', error);
+      }   
+    };
+
+    onMounted(() => {
+      checkAuthentication();
+    });
 
     return {
       username,

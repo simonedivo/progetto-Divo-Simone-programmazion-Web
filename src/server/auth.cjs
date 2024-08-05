@@ -68,4 +68,28 @@ router.post('/login', async (req, res) => {
     }
 });
 
+const verifyToken = (req, res, next) => {
+    const token = req.cookies['token'];
+    if (!token) {
+        return res.status(403).send('A token is required for authentication');
+    }
+    try {
+        const decoded = jwt.verify(token, secretKey);
+        req.user = decoded;
+    } catch (err) {
+        return res.status(401).send('Invalid Token');
+    }
+    return next();
+}
+
+router.get('/verifyToken', verifyToken, (req, res) => {
+    res.status(200).send('Token is valid');
+});
+
+router.get('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.status(200).send('User logged out');
+});
+
 module.exports = router;
+
