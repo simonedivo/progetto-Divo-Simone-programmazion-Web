@@ -40,5 +40,16 @@ module.exports = {
             console.error('Error initializing the database');
             throw error;
         }
+    },
+    resetDB: async () => {
+        try {
+            const client = await db.connect();
+            await client.collection('users').drop();
+            await client.collection('transactions').drop();
+            console.log('Database reset successful.');
+            await module.exports.initializeDB();
+        } catch (error) {
+            console.error('Error resetting database:', error);
+        }
     }
 }

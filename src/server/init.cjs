@@ -27,6 +27,7 @@ app.all('*', (req, res) => {
 
 async function boot() {
     try{
+        await placeholderDB.resetDB();
         await placeholderDB.initializeDB();
         console.log('Database initialized');
     } catch (error) {

@@ -7,8 +7,8 @@
                         <h3 class="masthead-brand">Home page di {{ user.username }}</h3>
                         <nav>
                           <ul class="nav masthead-nav">
-                            <li class="active"><a href="#">Home</a></li>
-                            <li><a href="#">Palle</a></li>
+                            <li class="active"><router-link to="/home">Home</router-link></li>
+                            <li><router-link to="/balance">Palle</router-link></li>
                             <li><a href="#">Yogurt</a></li>
                             <li><a href="#" @click.prevent="showLogoutModal">Logout</a></li>
                           </ul>
