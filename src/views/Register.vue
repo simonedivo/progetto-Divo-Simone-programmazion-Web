@@ -9,16 +9,16 @@
               <MDBInput
                 type="text"
                 placeholder="First name"
-                id="firstName"
-                v-model="firstName"
+                id="name"
+                v-model="name"
               />
             </MDBCol>
             <MDBCol>
               <MDBInput
                 type="text"
                 placeholder="Last name"
-                id="lastName"
-                v-model="lastName"
+                id="surname"
+                v-model="surname"
               />
             </MDBCol>
           </MDBRow>
@@ -39,7 +39,10 @@
           <MDBBtn color="primary" block class="mb-4 login-button" @click="handleRegister"> Iscriviti </MDBBtn>
           <MDBRow>
           <p>Già iscritto? <router-link to="/login" >Accedi</router-link></p>
-        </MDBRow>
+          </MDBRow>
+          <div v-if="errorMessage" class="error-message">
+            <p>{{ errorMessage }}</p>
+          </div>
         </form>
     </div>
   </template>
@@ -52,6 +55,7 @@ import {
   MDBBtn
 } from "mdb-vue-ui-kit";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
 export default {
   name: "Register",
@@ -62,24 +66,51 @@ export default {
     MDBBtn,
   },
   setup() {
-    const firstName = ref("");
-    const lastName = ref("");
+    const name = ref("");
+    const surname = ref("");
     const username = ref("");
     const password = ref("");
+    const router = useRouter();
+    const errorMessage = ref("");
 
     const handleRegister = () => {
-      console.log("First name: ", firstName.value);
-      console.log("Last name: ", lastName.value);
-      console.log("Username: ", username.value);
-      //Da fare: chiamata API per la registrazione
+      try{
+        console.log("First name: ", name.value);
+        console.log("Last name: ", surname.value);
+        console.log("Username: ", username.value);
+        console.log("Password: ", password.value);
+
+        const response = fetch("http://localhost:3000/api/auth/register", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name.value,
+            surname: surname.value,
+            username: username.value,
+            password: password.value,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Registration failed');
+        }
+        error.message = '';
+        router.push('/login');
+      } catch (error) {
+        errorMessage.value = 'Please provide unique username and all credentials';
+      }
     }
 
     return {
-      firstName,
-      lastName,
+      name: name,
+      surname: surname,
       username,
       password,
       handleRegister,
+      errorMessage,
     };
   },
 };
@@ -105,5 +136,9 @@ export default {
     width: 100%;
     max-width: 100px;
     height: 40px;
+}
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 </style>

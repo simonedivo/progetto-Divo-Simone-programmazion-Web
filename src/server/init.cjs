@@ -16,12 +16,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 app.use('/api/auth', auth);
 app.use('/api/user', user);
 
 app.all('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'public', '404.html'));
+    res.sendFile(path.resolve(__dirname, '..', '..', 'public', '404.html'));
 });
 
 

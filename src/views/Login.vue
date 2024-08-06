@@ -20,7 +20,7 @@
         />
         <MDBBtn color="primary" class="mb-2 login-button" block @click="handleLogin"> Accedi </MDBBtn>
         <MDBRow>
-          <p>Non sei ancora registrato? <router-link to="/register" class="hover-text" @mouseover="hoverText = 'Registrati ora'" @mouseleave="hoverText = 'Arrangiati'">{{ hoverText }}</router-link></p>
+          <p>Non sei ancora registrato? <router-link to="/register">Registrati ora</router-link></p>
         </MDBRow>
         <div v-if="errorMessage" class="error-message">
           <p>{{ errorMessage }}</p>
@@ -48,7 +48,6 @@ export default {
   setup() {
     const username = ref("");
     const password = ref("");
-    const hoverText = ref("Arrangiati");
     const errorMessage = ref("");
     const router = useRouter();
 
@@ -102,7 +101,6 @@ export default {
     return {
       username,
       password,
-      hoverText,
       handleLogin,
       errorMessage,
     };
@@ -125,11 +123,6 @@ export default {
 .bigger-container {
     transform: scale(1.3);
     transform-origin: center;
-}
-.hover-text {
-    display: inline-block;
-    width: 100px;
-    text-align: center;
 }
 .login-button {
     width: 100%;

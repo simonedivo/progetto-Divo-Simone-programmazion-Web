@@ -3,11 +3,14 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const db = require('./db.cjs');
+const crypto = require('crypto');
 
-const secretKey = 'il-sombrero-di-azazel-817';
+const secretKey = crypto.randomBytes(32).toString('hex');
 
 router.post('/register', async (req, res) => {
     const { username, name, surname, password } = req.body;
+    console.log('Request body: ', req.body);
+    console.log(username, name, surname, password);
 
     if (!username || !name || !surname || !password) {
         return res.status(400).send('All fields are required');
