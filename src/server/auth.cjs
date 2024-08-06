@@ -3,9 +3,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const db = require('./db.cjs');
-const crypto = require('crypto');
+const { secretKey, verifyToken } = require('./token.cjs');
 
-const secretKey = crypto.randomBytes(32).toString('hex');
 
 router.post('/register', async (req, res) => {
     const { username, name, surname, password } = req.body;
@@ -70,20 +69,6 @@ router.post('/login', async (req, res) => {
         res.status(500).send('An error occurred while logging in');
     }
 });
-
-const verifyToken = (req, res, next) => {
-    const token = req.cookies['token'];
-    if (!token) {
-        return res.status(403).send('A token is required for authentication');
-    }
-    try {
-        const decoded = jwt.verify(token, secretKey);
-        req.user = decoded;
-    } catch (err) {
-        return res.status(401).send('Invalid Token');
-    }
-    return next();
-}
 
 router.get('/verifyToken', verifyToken, (req, res) => {
     res.status(200).send('Token is valid');
