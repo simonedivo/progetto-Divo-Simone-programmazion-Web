@@ -75,7 +75,7 @@ export default {
         errorMessage.value = '';
         router.push('/home');
       } catch (error) {
-        errorMessage.value = 'Invalid username or password!';
+        errorMessage.value = 'Username o password errati';
       }
     };
 

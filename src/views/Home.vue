@@ -8,54 +8,108 @@
                         <nav>
                           <ul class="nav masthead-nav">
                             <li class="active"><a href="#">Home</a></li>
-                            <li><a href="#">Features</a></li>
-                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">Palle</a></li>
+                            <li><a href="#">Yogurt</a></li>
+                            <li><a href="#" @click.prevent="showLogoutModal">Logout</a></li>
                           </ul>
                         </nav>
                     </div>
                 </div>
                 <div class="inner cover">
-                    <h1 class="cover-heading">Cover your page.</h1>
-                    <p class="lead">Cover is a one-page template for building simple and beautiful home pages. Download, edit the text, and add your own fullscreen background photo to make it your own.</p>
+                    <h1 class="cover-heading">Test potentissimi</h1>
+                    <li class="lead" v-for="user in users" :key="user.username">{{ user.username }}</li>
                     <p class="lead">
-                        <a href="#" class="btn btn-lg btn-default">Learn more</a>
+                        <a href="#" class="btn btn-lg btn-default">SUCA</a>
                     </p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div v-if="isLogoutModalVisible" class="modal">
+        <div class="modal-content">
+            <span class="close" @click="hideLogoutModal">&times;</span>
+            <p>Sei sicuro di voler effettuare il logout?</p>
+            <button @click="handleLogout">Sì</button>
+            <button @click="hideLogoutModal">No</button>
         </div>
     </div>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default {
     name: "Home",
     setup() {
     const user = ref({ username: '' });
+    const users = ref([]);
+    const router = useRouter();
+    const isLogoutModalVisible = ref(false);
 
     const fetchUserData = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/user/getUser', {
-          method: 'GET',
-          credentials: 'include',
-        });
-        if (response.ok) {
-          user.value = await response.json();
-        } else {
-          console.error('Failed to fetch user data');
+        try {
+          const response = await fetch('http://localhost:3000/api/user/getUser', {
+            method: 'GET',
+            credentials: 'include',
+          });
+          if (response.ok) {
+            user.value = await response.json();
+          } else {
+            console.error('Failed to fetch user data');
+          }
+        } catch (error) {
+          console.error('Error fetching user data', error);
         }
-      } catch (error) {
-        console.error('Error fetching user data', error);
-      }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/user/getUsers', {
+                method: 'GET',
+                credentials: 'include',
+            });
+            users.value = await response.json();
+        } catch (error) {
+            console.error('Error fetching users', error);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/logout', {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                router.push('/login');
+            } else {
+                console.error('Failed to logout');
+            }
+        } catch (error) {
+            console.error('Error logging out', error);
+        }
+    };
+    const showLogoutModal = () => {
+        isLogoutModalVisible.value = true;
+    };
+    const hideLogoutModal = () => {
+        isLogoutModalVisible.value = false;
     };
 
     onMounted(() => {
       fetchUserData();
+      fetchUsers();
     });
 
     return {
-      user,
+        user,
+        users,
+        handleLogout,
+        isLogoutModalVisible,
+        showLogoutModal,
+        hideLogoutModal,
     };
   },
 };
@@ -138,16 +192,6 @@ body {
   color: #fff;
   border-bottom-color: #fff;
 }
-
-@media (min-width: 768px) {
-  .masthead-brand {
-    float: left;
-  }
-  .masthead-nav {
-    float: right;
-  }
-}
-
 .cover {
   padding: 0 20px;
 }
@@ -155,17 +199,67 @@ body {
   padding: 10px 20px;
   font-weight: bold;
 }
-
 @media (min-width: 768px) {
-  /* Pull out the header and footer */
   .masthead {
     position: fixed;
     top: 0;
   }
-  /* Start the vertical centering */
   .site-wrapper-inner {
     vertical-align: middle;
   }
+}
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
 
+.modal-content {
+  background-color: var(--color-background);
+  margin: auto;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
+.close {
+  color: var(--color-text);
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: var(--color-heading);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button {
+  background-color: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 10px 20px;
+  margin: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button:hover {
+  background-color: var(--color-background-mute);
+  color: var(--color-heading);
 }
 </style>

@@ -100,7 +100,7 @@ export default {
         error.message = '';
         router.push('/login');
       } catch (error) {
-        errorMessage.value = 'Please provide unique username and all credentials';
+        errorMessage.value = 'Inserisci tutti i campi e verifica che lo username non sia già stato utilizzato';
       }
     }
 

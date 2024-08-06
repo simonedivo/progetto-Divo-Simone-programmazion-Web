@@ -23,7 +23,10 @@ module.exports = {
                 ]);
 
                 await client.collection('transactions').insertMany([
-                    {},
+                    {
+                        createdBy: 'Solid Snake', category: 'Food', description: 'Ration',
+                        cost: 10, quotes:[{contributors: 'Solid Snake', share: 10}] ,date: new Date(2005, 2, 3)
+                    },
                     {},
                     {},
                     {},
