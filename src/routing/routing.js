@@ -3,6 +3,7 @@ import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Home from '../views/Home.vue';
 import Balance from '../views/Balance.vue';
+import ExpensesManagement from '../views/ExpensesManagement.vue';
 
 const routes = [
     { path: '/', redirect: '/login' },
@@ -10,6 +11,7 @@ const routes = [
     { path: '/register', name: 'Register', component: Register },
     { path: '/home', name: 'Home', component: Home },
     { path: '/balance', name: 'Balance', component: Balance},
+    { path: '/expenses-management', name: 'ExpensesManagement', component: ExpensesManagement},
 ]
 
 const router = createRouter({

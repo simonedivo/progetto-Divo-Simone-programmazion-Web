@@ -92,13 +92,28 @@ router.get('/:year/:month/:id', verifyToken, async (req, res) => {
                     $expr: {
                         $eq: [{ $month: "$date" }, parseInt(req.params.month)]
                     }
-                }
+                },
+                { 
+                    id: parseInt(req.params.id)
+                },
             ]
         }).toArray();
         res.status(200).json(transactions);
     } catch (error) {
         console.error('Error getting transactions', error);
     }
+});
+
+router.post('/:year/:month', verifyToken, async (req, res) => {
+
+});
+
+router.put('/:year/:month/:id', verifyToken, async (req, res) => {
+
+});
+
+router.delete('/:year/:month/:id', verifyToken, async (req, res) => {
+
 });
 
 module.exports = router;

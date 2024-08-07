@@ -4,12 +4,12 @@
             <div class="container">
                 <div class="masthead clearfix">
                     <div class="container inner text-center">
-                        <h3 class="masthead-brand">Pagina del Balance</h3>
+                        <h3 class="masthead-brand">Il tuo bilancio</h3>
                         <nav class="nav-center">
                           <ul class="nav masthead-nav">
                             <li><router-link to="/home">Home</router-link></li>
-                            <li class="active"><router-link to="/balance">Palle</router-link></li>
-                            <li><a href="#">Yogurt</a></li>
+                            <li class="active"><router-link to="/balance">Bilancio</router-link></li>
+                            <li><router-link to="expenses-management">Management</router-link></li>
                             <li><a href="#" @click.prevent="showLogoutModal">Logout</a></li>
                           </ul>
                         </nav>
