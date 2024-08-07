@@ -66,7 +66,6 @@ export default {
     name: "Home",
     setup() {
     const user = ref({ username: '' });
-    const users = ref([]);
     const expenses = ref([]);
     const year = ref(null);
     const month = ref(null);
@@ -76,7 +75,7 @@ export default {
 
     const fetchUserData = async () => {
         try {
-          const response = await fetch('http://localhost:3000/api/user/getUser', {
+          const response = await fetch('http://localhost:3000/api/budget/whoami', {
             method: 'GET',
             credentials: 'include',
           });
@@ -87,18 +86,6 @@ export default {
           }
         } catch (error) {
           console.error('Error fetching user data', error);
-        }
-    };
-
-    const fetchUsers = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/api/user/getUsers', {
-                method: 'GET',
-                credentials: 'include',
-            });
-            users.value = await response.json();
-        } catch (error) {
-            console.error('Error fetching users', error);
         }
     };
 
@@ -155,13 +142,11 @@ export default {
 
     onMounted(() => {
       fetchUserData();
-      fetchUsers();
       fetchExpenses();
     });
 
     return {
         user,
-        users,
         expenses,
         year,
         month,
@@ -244,7 +229,13 @@ body {
 .inner {
   padding: 30px;
 }
-
+.masthead {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
 .masthead-brand {
   margin-top: 10px;
   margin-bottom: 10px;

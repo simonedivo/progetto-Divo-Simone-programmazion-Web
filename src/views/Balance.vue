@@ -4,7 +4,7 @@
             <div class="container">
                 <div class="masthead clearfix">
                     <div class="container inner text-center">
-                        <h3 class="masthead-brand">Il tuo bilancio</h3>
+                        <h3 class="masthead-brand"><strong>Bilancio</strong></h3>
                         <nav class="nav-center">
                           <ul class="nav masthead-nav">
                             <li><router-link to="/home">Home</router-link></li>
@@ -128,7 +128,13 @@ body {
 .inner {
   padding: 30px;
 }
-
+.masthead {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
 .masthead-brand {
   margin-top: 10px;
   margin-bottom: 10px;

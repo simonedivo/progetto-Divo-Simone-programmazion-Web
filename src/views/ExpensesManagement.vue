@@ -4,7 +4,7 @@
             <div class="container">
                 <div class="masthead clearfix">
                     <div class="container inner text-center">
-                        <h3 class="masthead-brand">Aggiungi, modifica o elimina una spesa</h3>
+                        <h3 class="masthead-brand"><strong>Aggiungi, modifica o elimina una spesa</strong></h3>
                         <nav class="nav-center">
                           <ul class="nav masthead-nav">
                             <li><router-link to="/home">Home</router-link></li>
@@ -15,13 +15,49 @@
                         </nav>
                     </div>
                 </div>
-                <div class="inner cover">
-                    <h1 class="cover-heading">Balle</h1>
-                    <p class="lead">
-                        <a href="#" class="btn btn-lg btn-default">PISO</a>
-                    </p>
+                <div class="inner cover nav-pills-container">
+                    <ul class="nav nav-pills fixed-header mt-2">
+                      <li class="nav-item"><a class="nav-link" :class="{ active: activeTab === 'add' }" href="#" @click.prevent="activeTab = 'add'">Aggiungi</a></li>
+                      <li class="nav-item"><a class="nav-link" :class="{ active: activeTab === 'modify' }" href="#" @click.prevent="activeTab = 'modify'">Modifica</a></li>
+                      <li class="nav-item"><a class="nav-link" :class="{ active: activeTab === 'delete' }" href="#" @click.prevent="activeTab = 'delete'">Elimina</a></li>
+                    </ul>
+                </div>
+                <div>
+                  <div v-if="activeTab === 'add'">
+                    <h1>Inserisci i dati per una nuova spesa</h1>
+                    <form @submit.prevent="confirmAddTransaction" class="form-container">
+                      <div class="form-group">
+                        <label for="category">Categoria</label>
+                        <input type="text" id="category" v-model="newTransaction.category" class="form-control" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="description">Descrizione</label>
+                        <input type="text" id="description" v-model="newTransaction.description" class="form-control" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="cost">Importo</label>
+                        <input type="number" id="cost" v-model="newTransaction.cost" class="form-control" required>
+                      </div>
+                      <button type="submit" class="btn btn-default">Aggiungi</button>
+                    </form>
+                  </div>
+                  <div v-if="activeTab === 'modify'">
+                    <h1>Modifica roba</h1>
+                  </div>
+                  <div v-if="activeTab === 'delete'">
+                    <h1>Elimina roba</h1>
+                  </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div v-if="isContributorModalVisible" class="modal">
+        <div class="modal-content">
+            <span class="close" @click="hideContributorModal">&times;</span>
+            <p>Vuoi aggiungere altri contributori?</p>
+            <button @click="showContributorInputs">Sì</button>
+            <button @click="hideAndConfirm">No</button>
         </div>
     </div>
 
@@ -36,43 +72,125 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default {
-    name: "Balance",
+    name: "ExpensesManagement",
     setup() {
-    const router = useRouter();
-    const isLogoutModalVisible = ref(false);
+      const router = useRouter();
+      const users = ref([]);
+      const searchQuery = ref('');
+      const filteredUsers = ref([]);
+      const isLogoutModalVisible = ref(false);
+      const isContributorModalVisible = ref(false);
+      const activeTab = ref('add');
+      const newTransaction = ref({
+        category: '',
+        description: '',
+        cost: 0,
+        quotes: [],
+      });
 
-    const handleLogout = async () => {
+      const addTransaction = async () => {
+        console.log(newTransaction.value);
         try {
-            const response = await fetch('http://localhost:3000/api/auth/logout', {
+          const currentDate = new Date();
+          const currentYear = currentDate.getFullYear();
+          const currentMonth = currentDate.getMonth() + 1;
+          const currentDay = currentDate.getDate();
+          const url = 'http://localhost:3000/api/budget/'+`/${currentYear}/${currentMonth}/${currentDay}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newTransaction.value),
+          });
+          if (response.ok) {
+            console.log('Transaction added');
+          } else {
+            console.error('Failed to add transaction');
+          }
+        } catch (error) {
+          console.error('Error adding transaction', error);
+        }
+      };
+
+      const fetchUsers = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/budget/all', {
                 method: 'GET',
                 credentials: 'include',
             });
-            if (response.ok) {
-                router.push('/login');
-            } else {
-                console.error('Failed to logout');
-            }
+            users.value = await response.json();
+            filteredUsers.value = users.value;
         } catch (error) {
-            console.error('Error logging out', error);
+            console.error('Error fetching users', error);
         }
-    };
-    const showLogoutModal = () => {
-        isLogoutModalVisible.value = true;
-    };
-    const hideLogoutModal = () => {
-        isLogoutModalVisible.value = false;
-    };
-    return {
-        handleLogout,
-        isLogoutModalVisible,
-        showLogoutModal,
-        hideLogoutModal,
-    };
-  },
+      };
+
+      const filterUsers = () => {
+        filteredUsers.value = users.value.filter(user => user.username.toLowerCase().includes(searchQuery.value.toLowerCase()));
+      };
+
+      const hideAndConfirm = () => {
+        isContributorModalVisible.value = false;
+        addTransaction();
+      };
+
+      const handleLogout = async () => {
+          try {
+              const response = await fetch('http://localhost:3000/api/auth/logout', {
+                  method: 'GET',
+                  credentials: 'include',
+              });
+              if (response.ok) {
+                  router.push('/login');
+              } else {
+                  console.error('Failed to logout');
+              }
+          } catch (error) {
+              console.error('Error logging out', error);
+          }
+      };
+
+      const confirmAddTransaction = () => {
+        isContributorModalVisible.value = true;
+      };
+
+      const hideContributorModal = () => {
+        isContributorModalVisible.value = false;
+      };
+
+      const showLogoutModal = () => {
+          isLogoutModalVisible.value = true;
+      };
+      const hideLogoutModal = () => {
+          isLogoutModalVisible.value = false;
+      };
+
+      onMounted(fetchUsers);
+      return {
+          activeTab,
+          handleLogout,
+          isLogoutModalVisible,
+          isContributorModalVisible,
+          showLogoutModal,
+          hideLogoutModal,
+          newTransaction,
+          addTransaction,
+          users,
+          fetchUsers,
+          filterUsers,
+          searchQuery,
+          filteredUsers,
+          confirmAddTransaction,
+          hideContributorModal,
+          hideAndConfirm,
+      };
+    },
 };
 </script>
 
@@ -90,7 +208,35 @@ a:hover {
   display: flex;
   justify-content: center;
 }
+.fixed-header {
+    position: fixed;
+    top: 140px;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 0;
+}
+.nav-pills-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.nav-pills {
+  display: flex;
+  justify-content: center;
+}
+.nav-pills > li {
+  margin: 0 15px;
+}
 
+.nav-pills > li > a {
+  font-size: 18px;
+  padding: 10px 20px;
+}
+.nav-pills > li > a.active {
+  background-color: #007bff; /* Change background color for active tab */
+  color: white; /* Change text color for active tab */
+  border-radius: 5px; /* Optional: Add border radius for active tab */
+}
 
 .btn-default,
 .btn-default:hover,
@@ -128,7 +274,13 @@ body {
 .inner {
   padding: 30px;
 }
-
+.masthead {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+}
 .masthead-brand {
   margin-top: 10px;
   margin-bottom: 10px;

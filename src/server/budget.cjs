@@ -4,6 +4,33 @@ const router = express.Router();
 const jwt = require ('jsonwebtoken');
 const { verifyToken } = require ('./token.cjs');
 
+router.get('/whoami', verifyToken, async (req, res) => {
+    try {
+        const client = await db.connect();
+        const user = await client.collection('users').findOne({ username: req.user.username }, { projection: { password: 0 } });
+        if (!user) {
+            res.status(404).send('User not found');
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error getting user', error);
+    }
+});
+
+router.get('/all', verifyToken, async (req, res) => {
+    try {
+        const client = await db.connect();
+        const user = await client.collection('users').findOne({ username: req.user.username }, { projection: { password: 0 } });
+        if (!user) {
+            res.status(404).send('User not found');
+        }
+        const users = await client.collection('users').find({ username: { $ne: req.user.username } }, { projection: { password: 0 } }).toArray();
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error getting users', error);
+    }
+});
+
 router.get('/', verifyToken, async (req, res) => {
     try {
         const client = await db.connect();
@@ -104,8 +131,37 @@ router.get('/:year/:month/:id', verifyToken, async (req, res) => {
     }
 });
 
-router.post('/:year/:month', verifyToken, async (req, res) => {
+//Ho aggiunto il giorno siccome ho costruito il db con la data completa
+router.post('/:year/:month/:day', verifyToken, async (req, res) => {
+    const { year, month, day } = req.params;
+    const { category, description, cost, quotes } = req.body;
+    const { username } = req.user;
 
+    const client = await db.connect();
+    const maxIdTransaction = await client.collection('transactions').find({}).sort({ id: -1 }).limit(1).toArray();
+    const maxId = maxIdTransaction.length > 0 ? maxIdTransaction[0].id : 0;
+    const newId = maxId + 1;
+
+    if (quotes.length === 0) {
+        quotes.push({ username, share: cost });
+    }
+    
+    const newTransaction = {
+        id: newId,
+        createdBy: username,
+        category,
+        description,
+        cost,
+        quotes,
+        date: new Date(year, month, day)
+    };
+
+    try {
+        const result = await client.collection('transactions').insertOne(newTransaction);
+        res.status(201).json(result);
+    } catch (error) {
+        console.error('Error creating transaction', error);
+    }
 });
 
 router.put('/:year/:month/:id', verifyToken, async (req, res) => {
