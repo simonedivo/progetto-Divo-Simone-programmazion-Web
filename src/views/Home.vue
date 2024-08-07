@@ -3,9 +3,9 @@
         <div class="site-wrapper-inner">
             <div class="container">
                 <div class="masthead clearfix">
-                    <div class="container inner">
+                    <div class="container inner text-center">
                         <h3 class="masthead-brand">Home page di {{ user.username }}</h3>
-                        <nav>
+                        <nav class="nav-center">
                           <ul class="nav masthead-nav">
                             <li class="active"><router-link to="/home">Home</router-link></li>
                             <li><router-link to="/balance">Palle</router-link></li>
@@ -120,6 +120,13 @@ a,
 a:focus,
 a:hover {
   color: #fff;
+}
+.text-center {
+  text-align: center;
+}
+.nav-center {
+  display: flex;
+  justify-content: center;
 }
 
 .btn-default,

@@ -6,7 +6,7 @@ const db = require('./db.cjs');
 const { secretKey, verifyToken } = require('./token.cjs');
 
 
-router.post('/register', async (req, res) => {
+router.post('/signup', async (req, res) => {
     const { username, name, surname, password } = req.body;
     console.log('Request body: ', req.body);
     console.log(username, name, surname, password);
@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/signin', async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {

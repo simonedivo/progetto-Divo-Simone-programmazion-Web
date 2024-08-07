@@ -80,7 +80,7 @@ export default {
         console.log("Username: ", username.value);
         console.log("Password: ", password.value);
 
-        const response = fetch("http://localhost:3000/api/auth/register", {
+        const response = fetch("http://localhost:3000/api/auth/signuo", {
           method: "POST",
           credentials: "include",
           headers: {

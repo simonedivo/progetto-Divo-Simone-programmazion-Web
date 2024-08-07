@@ -54,7 +54,7 @@ export default {
     const handleLogin = async () => {
       try {
         console.log('Login attempt', username.value, password.value);
-        const response = await fetch('http://localhost:3000/api/auth/login', {
+        const response = await fetch('http://localhost:3000/api/auth/signin', {
           method: 'POST',
           credentials: 'include',
           headers: {
