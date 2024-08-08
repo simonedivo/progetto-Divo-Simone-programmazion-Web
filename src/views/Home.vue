@@ -15,7 +15,7 @@
                         </nav>
                     </div>
                 </div>
-                <div class="inner cover">
+                <div class="inner cover scrollable-div">
                     <h1 class="cover-heading fixed-header mb-4">Le tue spese</h1>
                     <form class="fixed-form" @submit.prevent="fetchExpenses">
                       <label for="year">Year: </label>
@@ -37,7 +37,7 @@
                         <p class="inline">Contributors:
                           <ul class="inline">
                             <li v-for="quote in expense.quotes" :key="quote.contributors" class="inline">
-                              Contributor: {{ quote.contributors }}, Share: {{ quote.share }}
+                              Contributor: {{ quote.username }}, Share: {{ quote.share }}
                             </li>
                           </ul>
                         </p>
@@ -51,7 +51,7 @@
     <div v-if="isLogoutModalVisible" class="modal">
         <div class="modal-content">
             <span class="close" @click="hideLogoutModal">&times;</span>
-            <p>Sei sicuro di voler effettuare il logout?</p>
+            <p>Sei sicuro di voler effettuare il logout?</p>0
             <button @click="handleLogout">Sì</button>
             <button @click="hideLogoutModal">No</button>
         </div>
@@ -338,5 +338,10 @@ button {
 button:hover {
   background-color: var(--color-background-mute);
   color: var(--color-heading);
+}
+
+.scrollable-div {
+  max-height: 400px;
+  overflow: auto;
 }
 </style>

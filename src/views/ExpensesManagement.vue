@@ -35,12 +35,43 @@
                         <input type="text" id="description" v-model="newTransaction.description" class="form-control" required>
                       </div>
                       <div class="form-group">
-                        <label for="cost">Importo</label>
+                        <label for="cost">Importo in €</label>
                         <input type="number" id="cost" v-model="newTransaction.cost" class="form-control" required>
                       </div>
                       <button type="submit" class="btn btn-default">Aggiungi</button>
                     </form>
                   </div>
+                  <div v-if="activeTab === 'contributorTab'">
+                    <h1 class="mb-3">Aggiungi contribuenti</h1>
+                    <div class="center-container">
+                      <SimpleTypeahead
+                      	id="typeahead_id"
+                      	placeholder="Cerca utente"
+                      	:items="filteredUsers"
+                      	:minInputLength="1"
+                        :itemProjection="filteredUsers => filteredUsers.username"
+                      	@selectItem="selectUser"
+                      	@onInput="updateSearchQuery"
+                      ></SimpleTypeahead>
+                      <div>
+                        <div class="form-group">
+                          <label for="share">Quota in €</label>
+                          <input type="number" id="share" v-model="share" class="form-control" required>
+                        </div>
+                        <button @click="addContributor" class="btn btn-default">Aggiungi</button>
+                      </div>
+                      <div v-if="newTransaction.quotes.length > 0" class="contributors scrollable-div">
+                        <h2>Quote attuali: {{ totalQuotes }} €, su un totale di {{ newTransaction.cost }} €</h2>
+                        <ul style="list-style-type: none;">
+                          <li v-for="(quote, index) in newTransaction.quotes" :key="index">
+                            {{ quote.contributor}}: {{ quote.share }}
+                          </li>
+                        </ul>
+                        <button v-if="checkTotalQuotes()" @click="addTransaction" class="btn btn-default">Conferma</button>  
+                      </div>
+
+                  </div>
+                    </div>
                   <div v-if="activeTab === 'modify'">
                     <h1>Modifica roba</h1>
                   </div>
@@ -56,7 +87,7 @@
         <div class="modal-content">
             <span class="close" @click="hideContributorModal">&times;</span>
             <p>Vuoi aggiungere altri contributori?</p>
-            <button @click="showContributorInputs">Sì</button>
+            <button @click="showContributorTab">Sì</button>
             <button @click="hideAndConfirm">No</button>
         </div>
     </div>
@@ -72,19 +103,26 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import SimpleTypeahead from 'vue3-simple-typeahead';
+import 'vue3-simple-typeahead/dist/vue3-simple-typeahead.css';
 
 export default {
     name: "ExpensesManagement",
+    components: {
+      SimpleTypeahead,
+    },
     setup() {
       const router = useRouter();
       const users = ref([]);
-      const searchQuery = ref('');
       const filteredUsers = ref([]);
+      const searchQuery = ref('');
+      const selectedUser = ref(null);
       const isLogoutModalVisible = ref(false);
       const isContributorModalVisible = ref(false);
       const activeTab = ref('add');
+      const share = ref(0);
       const newTransaction = ref({
         category: '',
         description: '',
@@ -132,7 +170,36 @@ export default {
       };
 
       const filterUsers = () => {
-        filteredUsers.value = users.value.filter(user => user.username.toLowerCase().includes(searchQuery.value.toLowerCase()));
+        const query = searchQuery.value.toString().toLowerCase();
+        filteredUsers.value = users.value.filter(user => user.username.toLowerCase().includes(query));
+      };
+
+      const updateSearchQuery = (query) => {
+        searchQuery.value = query.input;
+        filterUsers();
+      };
+
+      const selectUser = (user) => {
+        selectedUser.value = user;
+      };
+
+      const addContributor = () => {
+        if (selectedUser.value && share.value > 0) {
+        newTransaction.value.quotes.push({
+          contributor: selectedUser.value.username,
+          share: share.value,
+        });
+        selectedUser.value = null;
+        share.value = 0;
+        }
+      };
+
+      const totalQuotes = computed(() => {
+        return newTransaction.value.quotes.reduce((acc, quote) => acc + quote.share, 0);
+      });
+
+      const checkTotalQuotes = () => {
+        return totalQuotes.value === newTransaction.value.cost;
       };
 
       const hideAndConfirm = () => {
@@ -160,6 +227,11 @@ export default {
         isContributorModalVisible.value = true;
       };
 
+      const showContributorTab = () => {
+        isContributorModalVisible.value = false;
+        activeTab.value = 'contributorTab';
+      };
+
       const hideContributorModal = () => {
         isContributorModalVisible.value = false;
       };
@@ -172,6 +244,7 @@ export default {
       };
 
       onMounted(fetchUsers);
+
       return {
           activeTab,
           handleLogout,
@@ -186,9 +259,17 @@ export default {
           filterUsers,
           searchQuery,
           filteredUsers,
+          selectedUser,
+          selectUser,
           confirmAddTransaction,
           hideContributorModal,
           hideAndConfirm,
+          showContributorTab,
+          addContributor,
+          share,
+          totalQuotes,
+          checkTotalQuotes,
+          updateSearchQuery,
       };
     },
 };
@@ -233,19 +314,11 @@ a:hover {
   padding: 10px 20px;
 }
 .nav-pills > li > a.active {
-  background-color: #007bff; /* Change background color for active tab */
-  color: white; /* Change text color for active tab */
-  border-radius: 5px; /* Optional: Add border radius for active tab */
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
 }
 
-.btn-default,
-.btn-default:hover,
-.btn-default:focus {
-  color: #333;
-  text-shadow: none;
-  background-color: #fff;
-  border: 1px solid #fff;
-}
 
 html,
 body {
@@ -298,7 +371,7 @@ body {
   padding-left: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #fff; /* IE8 proofing */
+  color: #fff;
   color: rgba(255,255,255,.75);
   border-bottom: 2px solid transparent;
 }
@@ -383,5 +456,26 @@ button {
 button:hover {
   background-color: var(--color-background-mute);
   color: var(--color-heading);
+}
+#typeahead_id_wrapper {
+  color: black;
+}
+.contributors {
+  position: fixed;
+  bottom: 0;
+  margin-bottom: 200px;
+  width: 100%;
+  padding: 10px;
+  align-items: center;
+  text-align: center;
+}
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.scrollable-div {
+  max-height: 200px;
+  overflow: auto;
 }
 </style>

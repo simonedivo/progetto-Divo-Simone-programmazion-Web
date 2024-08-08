@@ -20,11 +20,7 @@ router.get('/whoami', verifyToken, async (req, res) => {
 router.get('/all', verifyToken, async (req, res) => {
     try {
         const client = await db.connect();
-        const user = await client.collection('users').findOne({ username: req.user.username }, { projection: { password: 0 } });
-        if (!user) {
-            res.status(404).send('User not found');
-        }
-        const users = await client.collection('users').find({ username: { $ne: req.user.username } }, { projection: { password: 0 } }).toArray();
+        const users = await client.collection('users').find({}, { projection: { password: 0 } }).toArray();
         res.status(200).json(users);
     } catch (error) {
         console.error('Error getting users', error);
@@ -142,9 +138,10 @@ router.post('/:year/:month/:day', verifyToken, async (req, res) => {
     const maxId = maxIdTransaction.length > 0 ? maxIdTransaction[0].id : 0;
     const newId = maxId + 1;
 
-    if (quotes.length === 0) {
-        quotes.push({ username, share: cost });
-    }
+    const processedQuotes = quotes.length === 0 ? [{ username, share: cost }] : quotes.map(quote => ({
+        username: quote.contributor || username, // Use the contributor field if available, otherwise use the current user's username
+        share: quote.share
+    }));
     
     const newTransaction = {
         id: newId,
@@ -152,7 +149,7 @@ router.post('/:year/:month/:day', verifyToken, async (req, res) => {
         category,
         description,
         cost,
-        quotes,
+        quotes: processedQuotes,
         date: new Date(year, month, day)
     };
 
