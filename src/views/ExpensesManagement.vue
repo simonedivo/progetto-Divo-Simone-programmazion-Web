@@ -65,6 +65,7 @@
                         <ul style="list-style-type: none;">
                           <li v-for="(quote, index) in newTransaction.quotes" :key="index">
                             {{ quote.contributor}}: {{ quote.share }}
+                            <button @click="removeContributor(index)" class="remove-contributor-btn">X</button>
                           </li>
                         </ul>
                         <button v-if="checkTotalQuotes()" @click="addTransaction" class="btn btn-default">Conferma</button>  
@@ -194,6 +195,10 @@ export default {
         }
       };
 
+      const removeContributor = (index) => {
+        newTransaction.value.quotes.splice(index, 1);
+      };
+
       const totalQuotes = computed(() => {
         return newTransaction.value.quotes.reduce((acc, quote) => acc + quote.share, 0);
       });
@@ -266,6 +271,7 @@ export default {
           hideAndConfirm,
           showContributorTab,
           addContributor,
+          removeContributor,
           share,
           totalQuotes,
           checkTotalQuotes,
@@ -463,9 +469,8 @@ button:hover {
 .contributors {
   position: fixed;
   bottom: 0;
-  margin-bottom: 200px;
+  margin-bottom: 60px;
   width: 100%;
-  padding: 10px;
   align-items: center;
   text-align: center;
 }
@@ -475,7 +480,14 @@ button:hover {
   align-items: center;
 }
 .scrollable-div {
-  max-height: 200px;
+  max-height: 300px;
   overflow: auto;
+}
+.remove-contributor-btn {
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+  margin-left: 10px;
 }
 </style>

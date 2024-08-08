@@ -25,22 +25,22 @@ module.exports = {
                 await client.collection('transactions').insertMany([
                     {
                         id: 1, createdBy: 'Solid Snake', category: 'Food', description: 'Ration',
-                        cost: 10, quotes:[{contributors: 'Solid Snake', share: 10}] ,date: new Date(2005, 2, 3)
+                        cost: 10, quotes:[{username: 'Solid Snake', share: 10}] ,date: new Date(2005, 2, 3)
                     },
                     {
                         id: 2, createdBy: 'Otacon', category: 'Tech', description: 'Metal Gear Mk. II',
-                        cost: 1000000, quotes:[{contributors: 'Otacon', share: 1000000}], date: new Date(2004, 7, 12)
+                        cost: 1000000, quotes:[{username: 'Otacon', share: 1000000}], date: new Date(2004, 7, 12)
                     },
                     {
                         id: 3, createdBy: 'Solid Snake', category: 'Transport', description: 'Cardboard Box',
-                        cost: 20, quotes:[{contributors: 'Solid Snake', share: 10}, {contributors: 'Otacon', share:10}], date: new Date(2008, 9, 24)
+                        cost: 20, quotes:[{username: 'Solid Snake', share: 10}, {username: 'Otacon', share:10}], date: new Date(2008, 9, 24)
                     },
                     {
 
                     },
                     {
                         id: 4, createdBy: 'Otacon', category: 'Tech', description: 'Stealth Camo',
-                        cost: 5000, quotes:[{contributors: 'Otacon', share: 5000}], date: new Date(2004, 7, 28)
+                        cost: 5000, quotes:[{username: 'Otacon', share: 5000}], date: new Date(2004, 7, 28)
                     },
                 ]);
             }

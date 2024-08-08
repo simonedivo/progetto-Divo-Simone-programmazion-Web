@@ -16,17 +16,18 @@
                     </div>
                 </div>
                 <div class="inner cover scrollable-div">
-                    <h1 class="cover-heading fixed-header mb-4">Le tue spese</h1>
+                    <h1 class="cover-heading fixed-header mb-4">Le tue spese: filtrabili per mese, anno o id</h1>
+                    <p class="fixed-p">Il formato della data è <strong>MM/DD/YYYY</strong></p>
                     <form class="fixed-form" @submit.prevent="fetchExpenses">
-                      <label for="year">Year: </label>
+                      <label for="year">Anno: </label>
                       <input type="number" v-model="year" id="year" min="2000" max="2100" />
-                      <label for="month">Month: </label>
+                      <label for="month">Mese: </label>
                       <input type="number" v-model="month" id="month" min="1" max="12" />
                       <label for="id">ID: </label>
                       <input type="number" v-model="id" id="id" min="1" />
                       <button type="submit" class="btn btn-lg btn-default">Filter</button>
                     </form>
-                    <ul>
+                    <ul v-if="expenses.length > 0">
                       <li v-for="expense in expenses" :key="expense._id">
                         <p class="inline">ID: {{ expense.id }} |</p>
                         <p class="inline">Description: {{ expense.description }} |</p>
@@ -43,6 +44,7 @@
                         </p>
                       </li>
                     </ul>
+                    <h1 v-else>Nessuna spesa trovata</h1>
                 </div>
             </div>
         </div>
@@ -175,7 +177,7 @@ a:hover {
   justify-content: center;
 }
 .inline{
-  display: inline-block;
+  display: inline;
   margin-right: 10px;
 }
 .fixed-header {
@@ -188,6 +190,13 @@ a:hover {
 .fixed-form {
     position: fixed;
     top: 210px;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 0;
+}
+.fixed-p {
+    position: fixed;
+    top: 270px;
     width: 100%;
     z-index: 1000;
     padding: 10px 0;
@@ -342,6 +351,8 @@ button:hover {
 
 .scrollable-div {
   max-height: 400px;
-  overflow: auto;
+  overflow-y: auto;
+  margin-top: 20px;
+  width: 100%;
 }
 </style>

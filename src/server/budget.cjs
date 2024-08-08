@@ -32,7 +32,7 @@ router.get('/', verifyToken, async (req, res) => {
         const client = await db.connect();
         const transactions = await client.collection('transactions').find({
             $or: [
-                { 'quotes.contributors': req.user.username },
+                { 'quotes.username': req.user.username },
                 { createdBy: req.user.username }
             ]
         }).toArray();
@@ -49,7 +49,7 @@ router.get('/:year', verifyToken, async (req, res) => {
             $and: [
                 {
                     $or: [
-                        { 'quotes.contributors': req.user.username },
+                        { 'quotes.username': req.user.username },
                         { createdBy: req.user.username }
                     ]
                 },
@@ -73,7 +73,7 @@ router.get('/:year/:month', verifyToken, async (req, res) => {
             $and: [
                 {
                     $or: [
-                        { 'quotes.contributors': req.user.username },
+                        { 'quotes.username': req.user.username },
                         { createdBy: req.user.username }
                     ]
                 },
@@ -102,7 +102,7 @@ router.get('/:year/:month/:id', verifyToken, async (req, res) => {
             $and: [
                 {
                     $or: [
-                        { 'quotes.contributors': req.user.username },
+                        { 'quotes.username': req.user.username },
                         { createdBy: req.user.username }
                     ]
                 },
