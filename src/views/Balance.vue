@@ -16,10 +16,28 @@
                     </div>
                 </div>
                 <div class="inner cover">
-                    <h1 class="cover-heading">Balle</h1>
-                    <p class="lead">
-                        <a href="#" class="btn btn-lg btn-default">PISO</a>
-                    </p>
+                  <div class="typeahead-container">
+                    <SimpleTypeahead
+                      class="inline typeahead"
+                      id="typeahead_id"
+                      placeholder="Cerca bilancio con utente"
+                      :items="filteredUsers"
+                      :minInputLength="1"
+                      :itemProjection="filteredUsers => filteredUsers.username"
+                      @selectItem="getBalanceWithUser"
+                      @input="handleInput"
+                    ></SimpleTypeahead>
+                  </div>
+                  <div v-if="isBalanceWithUserVisible">
+                    <h1 class="inline">Il tuo bilancio con {{ selectedUser.username }} è </h1>
+                    <h1 class="inline" :style="{ color: balance < 0 ? 'red' : 'green' }">{{ balance }}</h1>
+                    <h1 class="inline">€</h1>
+                  </div>
+                  <div v-else>
+                    <h1 class="inline">Il tuo bilancio generale è </h1>
+                    <h1 class="inline" :style="{ color: balance < 0 ? 'red' : 'green' }">{{ balance }}</h1>
+                    <h1 class="inline">€</h1>
+                  </div>
                 </div>
             </div>
         </div>
@@ -38,12 +56,88 @@
 <script>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import SimpleTypeahead from 'vue3-simple-typeahead';
+import 'vue3-simple-typeahead/dist/vue3-simple-typeahead.css';
 
 export default {
     name: "Balance",
+    components: {
+        SimpleTypeahead,
+    },
     setup() {
     const router = useRouter();
     const isLogoutModalVisible = ref(false);
+    const balance = ref(0);
+    const users = ref([]);
+    const filteredUsers = ref([]);
+    const isBalanceWithUserVisible = ref(false);
+    const selectedUser = ref(null);
+
+
+    const getBalance = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/balance', {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data);
+                balance.value = -data.balance;
+            } else {
+                console.error('Failed to get balance');
+            }
+        } catch (error) {
+            console.error('Error getting balance', error);
+        }
+    };
+
+    const getBalanceWithUser = async (user) => {
+      const url = `http://localhost:3000/api/balance/${user._id}`;
+      console.log(url);
+        try {
+            const response = await fetch(`http://localhost:3000/api/balance/${user._id}`, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                balance.value = -data.balance;
+                selectedUser.value = user;
+                isBalanceWithUserVisible.value = true;
+            } else {
+                console.error('Failed to get balance with user');
+            }
+        } catch (error) {
+            console.error('Error getting balance with user', error);
+        }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/budget/all', {
+                method: 'GET',
+                credentials: 'include',
+            });
+            users.value = await response.json();
+            filteredUsers.value = users.value;
+        } catch (error) {
+            console.error('Error fetching users', error);
+        }
+    };
+
+    const filterUsers = () => {
+        const query = searchQuery.value.toString().toLowerCase();
+        filteredUsers.value = users.value.filter(user => user.username.toLowerCase().includes(query));
+    };
+
+    const handleInput = (event) => {
+      if (event.target.value === '') {
+        selectedUser.value = null;
+        isBalanceWithUserVisible.value = false;
+        getBalance();
+      }
+    };
 
     const handleLogout = async () => {
         try {
@@ -66,11 +160,29 @@ export default {
     const hideLogoutModal = () => {
         isLogoutModalVisible.value = false;
     };
+
+    onMounted(() => {
+        getBalance();
+        fetchUsers();
+        isBalanceWithUserVisible.value = false;
+        selectedUser.value = null;
+    });
+
     return {
         handleLogout,
         isLogoutModalVisible,
         showLogoutModal,
         hideLogoutModal,
+        balance,
+        getBalance,
+        users,
+        fetchUsers,
+        filteredUsers,
+        filterUsers,
+        getBalanceWithUser,
+        isBalanceWithUserVisible,
+        selectedUser,
+        handleInput,
     };
   },
 };
@@ -90,7 +202,31 @@ a:hover {
   display: flex;
   justify-content: center;
 }
+.inline{
+  display: inline-block;
+  margin-right: 10px;
+}
 
+.typeahead-container {
+  position: fixed;
+  top: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: 20px;
+  padding: 10px;
+  width: 100%;
+  border-bottom: 1px solid #ccc;
+}
+
+.typeahead {
+    width: 300px;
+    margin-left: 10px;
+}
 
 .btn-default,
 .btn-default:hover,
@@ -99,6 +235,11 @@ a:hover {
   text-shadow: none;
   background-color: #fff;
   border: 1px solid #fff;
+}
+
+#typeahead_id_wrapper {
+  color: black;
+  width: auto;
 }
 
 html,

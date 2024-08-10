@@ -3,6 +3,7 @@ const db = require ('./db.cjs');
 const router = express.Router();
 const { verifyToken } = require ('./token.cjs');
 
+//Non ho fatto il file users.cjs con router.get('/search') in quanto la ricerca utenti è gestita da simpletypeahead nel frontend
 
 router.get('/whoami', verifyToken, async (req, res) => {
     try {
