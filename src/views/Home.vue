@@ -15,36 +15,43 @@
                         </nav>
                     </div>
                 </div>
-                <div class="inner cover scrollable-div">
-                    <h1 class="cover-heading fixed-header mb-4">Le tue spese: filtrabili per mese, anno o id</h1>
-                    <p class="fixed-p">Il formato della data è <strong>MM/DD/YYYY</strong></p>
-                    <form class="fixed-form" @submit.prevent="fetchExpenses">
-                      <label for="year">Anno: </label>
-                      <input type="number" v-model="year" id="year" min="2000" max="2100" />
-                      <label for="month">Mese: </label>
-                      <input type="number" v-model="month" id="month" min="1" max="12" />
-                      <label for="id">ID: </label>
-                      <input type="number" v-model="id" id="id" min="1" />
-                      <button type="submit" class="btn btn-lg btn-default">Filter</button>
-                    </form>
-                    <ul v-if="expenses.length > 0">
-                      <li v-for="expense in expenses" :key="expense._id">
-                        <p class="inline">ID: {{ expense.id }} |</p>
-                        <p class="inline">Description: {{ expense.description }} |</p>
-                        <p class="inline">Amount: {{ expense.cost }} |</p>
-                        <p class="inline">Category: {{ expense.category }} |</p>
-                        <p class="inline">Created By: {{ expense.createdBy }} |</p>
-                        <p class="inline">Date: {{ new Date(expense.date).toLocaleDateString() }} |</p>
-                        <p class="inline">Contributors:
-                          <ul class="inline">
-                            <li v-for="quote in expense.quotes" :key="quote.contributors" class="inline">
-                              Contributor: {{ quote.username }}, Share: {{ quote.share }}
-                            </li>
-                          </ul>
-                        </p>
-                      </li>
-                    </ul>
-                    <h1 v-else>Nessuna spesa trovata</h1>
+                <div class="inner cover">
+                    <h1 class="cover-heading fixed-header mb-4">Le tue spese: filtrabili per mese, anno e id oppure per descrizione</h1>
+                    <div class="inline forms-container">
+                      <form class="fixed-form" @submit.prevent="fetchExpenses">
+                        <label for="year">Anno: </label>
+                        <input type="number" v-model="year" id="year" min="2000" max="2100" />
+                        <label for="month">Mese: </label>
+                        <input type="number" v-model="month" id="month" min="1" max="12" />
+                        <label for="id">ID: </label>
+                        <input type="number" v-model="id" id="id" min="1" />
+                        <button type="submit" class="btn btn-lg btn-default">Filtra</button>
+                      </form>
+                      <form class="fixed-form" @submit.prevent="fetchExpenses">
+                        <label for="description">Oppure cerca per descrizione: </label>
+                        <input type="text" v-model="description" id="description" @input="filterByDescription" />
+                      </form>
+                    </div>
+                    <div class="scrollable-div">
+                      <ul v-if="expenses.length > 0">
+                        <li v-for="expense in expenses" :key="expense._id">
+                          <p class="inline">ID: {{ expense.id }} |</p>
+                          <p class="inline">Descrizione: {{ expense.description }} |</p>
+                          <p class="inline">Costo: {{ expense.cost }} € |</p>
+                          <p class="inline">Categoria: {{ expense.category }} |</p>
+                          <p class="inline">Creato da: {{ expense.createdBy }} |</p>
+                          <p class="inline">Data: {{ new Date(expense.date).toLocaleDateString() }} |</p>
+                          <p class="inline">Quote:
+                            <ul class="inline">
+                              <li v-for="quote in expense.quotes" :key="quote.contributors" class="inline">
+                                Contribuente: {{ quote.username }}, Quota: {{ quote.share }} €
+                              </li>
+                            </ul>
+                          </p>
+                        </li>
+                      </ul>
+                      <h1 v-else>Nessuna spesa trovata</h1>
+                    </div>
                 </div>
             </div>
         </div>
@@ -74,6 +81,7 @@ export default {
     const id = ref(null);
     const router = useRouter();
     const isLogoutModalVisible = ref(false);
+    const description = ref('');
 
     const fetchUserData = async () => {
         try {
@@ -114,33 +122,49 @@ export default {
     };
 
     const fetchExpenses = async () => {
-            try {
-                let url = 'http://localhost:3000/api/budget';
-                if (year.value) {
-                  url += `/${year.value}`;
-                  if (month.value) {
-                    url += `/${month.value}`;
-                    if (id.value) {
-                      url += `/${id.value}`;
-                    }
-                  }
-                }
-                console.log(url);
-                const response = await fetch(url, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    expenses.value = data;
-                    console.log('Expenses', expenses.value);
-                } else {
-                    console.error('Failed to fetch expenses');
-                }
-            } catch (error) {
-                console.error('Error fetching expenses', error);
+      try {
+          let url = 'http://localhost:3000/api/budget';
+          if (year.value) {
+            url += `/${year.value}`;
+            if (month.value) {
+              url += `/${month.value}`;
+              if (id.value) {
+                url += `/${id.value}`;
+              }
             }
-        };
+          }
+          const response = await fetch(url, {
+              method: 'GET',
+              credentials: 'include',
+          });
+          if (response.ok) {
+              const data = await response.json();
+              expenses.value = data;
+          } else {
+              console.error('Failed to fetch expenses');
+          }
+      } catch (error) {
+          console.error('Error fetching expenses', error);
+      }
+    };
+
+    const filterByDescription = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/budget/search?q=${encodeURIComponent(description.value)}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          expenses.value = data;
+          console.log('Filtered Expenses', expenses.value);
+        } else {
+          console.error('Failed to fetch filtered expenses', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching filtered expenses', error);
+      }
+    };
 
     onMounted(() => {
       fetchUserData();
@@ -158,6 +182,8 @@ export default {
         showLogoutModal,
         hideLogoutModal,
         fetchExpenses,
+        description,
+        filterByDescription,
     };
   },
 };
@@ -177,29 +203,43 @@ a:hover {
   justify-content: center;
 }
 .inline{
-  display: inline;
+  display: inline-block;
   margin-right: 10px;
+}
+.forms-container {
+  position: fixed;
+  top: 200px;
+  z-index: 1000;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
 }
 .fixed-header {
     position: fixed;
     top: 140px;
-    width: 100%;
+    width: auto;
     z-index: 1000;
     padding: 10px 0;
 }
 .fixed-form {
-    position: fixed;
+    display: flex;
+    align-items: center;
     top: 210px;
     width: 100%;
     z-index: 1000;
     padding: 10px 0;
+    flex-wrap: nowrap;
+    gap: 10px;
 }
-.fixed-p {
-    position: fixed;
-    top: 270px;
-    width: 100%;
-    z-index: 1000;
-    padding: 10px 0;
+.fixed-form input {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
 }
 
 .btn-default,
@@ -209,6 +249,21 @@ a:hover {
   text-shadow: none;
   background-color: #fff;
   border: 1px solid #fff;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 14px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+.inner.cover {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 html,
@@ -262,7 +317,7 @@ body {
   padding-left: 0;
   font-size: 16px;
   font-weight: bold;
-  color: #fff; /* IE8 proofing */
+  color: #fff;
   color: rgba(255,255,255,.75);
   border-bottom: 2px solid transparent;
 }

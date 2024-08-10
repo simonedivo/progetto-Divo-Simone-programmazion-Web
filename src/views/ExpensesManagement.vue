@@ -56,7 +56,7 @@
                       <div>
                         <div class="form-group">
                           <label for="share">Quota in €</label>
-                          <input type="number" id="share" v-model="share" class="form-control" required>
+                          <input type="number" id="share" v-model="share" class="form-control" :min="-Infinity">
                         </div>
                         <button @click="addContributor" class="btn btn-default">Aggiungi</button>
                       </div>
@@ -65,7 +65,7 @@
                         <ul style="list-style-type: none;">
                           <li v-for="(quote, index) in newTransaction.quotes" :key="index">
                             {{ quote.contributor}}: {{ quote.share }}
-                            <button @click="removeContributor(index)" class="remove-contributor-btn">X</button>
+                            <button @click="removeContributor(index)" class="remove-btn">X</button>
                           </li>
                         </ul>
                         <button v-if="checkTotalQuotes()" @click="addTransaction" class="btn btn-default">Conferma</button>  
@@ -73,15 +73,60 @@
 
                   </div>
                     </div>
-                  <div v-if="activeTab === 'modify'">
-                    <h1>Modifica roba</h1>
+                  <div v-if="activeTab === 'modify'" class="scrollable-div">
+                    <ul v-if="expenses.length > 0">
+                      <li v-for="expense in expenses" :key="expense._id">
+                        <p class="inline">ID: {{ expense.id }} |</p>
+                        <p class="inline">Descrizione: {{ expense.description }} |</p>
+                        <p class="inline">Costo: {{ expense.cost }} € |</p>
+                        <p class="inline">Categoria: {{ expense.category }} |</p>
+                        <p class="inline">Creato da: {{ expense.createdBy }} |</p>
+                        <p class="inline">Data: {{ new Date(expense.date).toLocaleDateString() }} |</p>
+                        <p class="inline">Quote:
+                          <ul class="inline">
+                            <li v-for="quote in expense.quotes" :key="quote.contributors" class="inline">
+                              Contribuente: {{ quote.username }}, Quota: {{ quote.share }} €
+                            </li>
+                          </ul>
+                        </p>
+                        <button v-if="expense.createdBy === user.username"  @click="showModifyModal(expense)"  class="modify-expense-btn inline">  Modify</button>
+                      </li>
+                    </ul>
+                    <h1 v-else>Nessuna spesa trovata</h1>
                   </div>
-                  <div v-if="activeTab === 'delete'">
-                    <h1>Elimina roba</h1>
+                  <div v-if="activeTab === 'delete'" class="scrollable-div">
+                    <ul v-if="expenses.length > 0">
+                      <li v-for="expense in expenses" :key="expense._id">
+                        <p class="inline">ID: {{ expense.id }} |</p>
+                        <p class="inline">Descrizione: {{ expense.description }} |</p>
+                        <p class="inline">Costo: {{ expense.cost }} € |</p>
+                        <p class="inline">Categoria: {{ expense.category }} |</p>
+                        <p class="inline">Creato da: {{ expense.createdBy }} |</p>
+                        <p class="inline">Data: {{ new Date(expense.date).toLocaleDateString() }} |</p>
+                        <p class="inline">Quote:
+                          <ul class="inline">
+                            <li v-for="quote in expense.quotes" :key="quote.contributors" class="inline">
+                              Contribuente: {{ quote.username }}, Quota: {{ quote.share }} €
+                            </li>
+                          </ul>
+                        </p>
+                        <button v-if="expense.createdBy === user.username"  @click="showDeleteModal(expense)"  class="remove-btn inline">  X</button>
+                      </li>
+                    </ul>
+                    <h1 v-else>Nessuna spesa trovata</h1>
                   </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div v-if="isDeleteModalVisible" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="hideDeleteModal">&times;</span>
+        <p>Sei sicuro di voler eliminare questa spesa?</p>
+        <button @click="deleteExpense">Sì</button>
+        <button @click="hideDeleteModal">No</button>
+      </div>
     </div>
 
     <div v-if="isContributorModalVisible" class="modal">
@@ -91,6 +136,22 @@
             <button @click="showContributorTab">Sì</button>
             <button @click="hideAndConfirm">No</button>
         </div>
+    </div>
+
+    <div v-if="isModifyModalVisible" class="modal-overlay">
+      <div class="modal-content">
+        <h2>Modifica la spesa</h2>
+        <form @submit.prevent="modifyExpense">
+          <label for="description">Descrizione:</label>
+          <input type="text" v-model="modifiedExpense.description" id="description" />
+
+          <label for="category">Categoria:</label>
+          <input type="text" v-model="modifiedExpense.category" id="category" />
+
+          <button type="submit" class="btn btn-primary">Salva</button>
+          <button type="button" @click="isModifyModalVisible = false" class="btn btn-secondary">Annulla</button>
+        </form>
+      </div>
     </div>
 
     <div v-if="isLogoutModalVisible" class="modal">
@@ -130,6 +191,12 @@ export default {
         cost: 0,
         quotes: [],
       });
+      const user = ref({username : ''});
+      const expenses = ref([]);
+      const isModifyModalVisible = ref(false);
+      const modifiedExpense = ref({});
+      const isDeleteModalVisible = ref(false);
+      const expenseToDelete = ref({});
 
       const addTransaction = async () => {
         console.log(newTransaction.value);
@@ -149,6 +216,7 @@ export default {
           });
           if (response.ok) {
             console.log('Transaction added');
+            router.push('/home');
           } else {
             console.error('Failed to add transaction');
           }
@@ -185,7 +253,7 @@ export default {
       };
 
       const addContributor = () => {
-        if (selectedUser.value && share.value > 0) {
+        if (selectedUser.value && share.value !== 0) {
         newTransaction.value.quotes.push({
           contributor: selectedUser.value.username,
           share: share.value,
@@ -205,6 +273,68 @@ export default {
 
       const checkTotalQuotes = () => {
         return totalQuotes.value === newTransaction.value.cost;
+      };
+
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch('http://localhost:3000/api/budget/whoami', {
+            method: 'GET',
+            credentials: 'include',
+          });
+          if (response.ok) {
+            user.value = await response.json();
+          } else {
+            console.error('Failed to fetch user data');
+          }
+        } catch (error) {
+          console.error('Error fetching user data', error);
+        }
+      };
+
+      const fetchExpenses = async () => {
+        try {
+            let url = 'http://localhost:3000/api/budget';
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'include',
+            });
+            if (response.ok) {
+                const data = await response.json();
+                expenses.value = data;
+            } else {
+                console.error('Failed to fetch expenses');
+            }
+        } catch (error) {
+          console.error('Error fetching expenses', error);
+        }
+      };
+
+      const showModifyModal = (expense) => {
+        modifiedExpense.value = expense;
+        isModifyModalVisible.value = true;
+      };
+
+      const modifyExpense = async (expense) => {
+        try {
+          const {id} = modifiedExpense.value;
+          const date = new Date(modifiedExpense.value.date);
+          const year = date.getFullYear();
+          const month = date.getMonth() + 1;
+          const response = await fetch(`http://localhost:3000/api/budget/${year}/${month}/${id}`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(modifiedExpense.value),
+          });
+          if (response.ok) {
+            isModifyModalVisible.value = false;
+            fetchExpenses();
+          }
+        } catch (error) {
+          console.error('Error modifying expense', error);
+        }
       };
 
       const hideAndConfirm = () => {
@@ -245,10 +375,41 @@ export default {
           isLogoutModalVisible.value = true;
       };
       const hideLogoutModal = () => {
-          isLogoutModalVisible.value = false;
+        isLogoutModalVisible.value = false;
       };
+      
+      const showDeleteModal = (expense) => {
+        expenseToDelete.value = expense;
+        isDeleteModalVisible.value = true;
+      };
+      const hideDeleteModal = () => {
+        isDeleteModalVisible.value = false;
+      };
+      const deleteExpense = async () => {
+        try {
+          const {id} = expenseToDelete.value;
+          const date = new Date(expenseToDelete.value.date);
+          const year = date.getFullYear();
+          const month = date.getMonth() + 1;
+          const response = await fetch(`http://localhost:3000/api/budget/${year}/${month}/${id}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+          if (response.ok) {
+            isDeleteModalVisible.value = false;
+            fetchExpenses();
+          }
+        } catch (error) {
+          console.error('Error deleting expense', error);
+        }
+      };
+      
 
-      onMounted(fetchUsers);
+      onMounted(() => {
+        fetchUserData();
+        fetchUsers();
+        fetchExpenses();
+      });
 
       return {
           activeTab,
@@ -276,6 +437,19 @@ export default {
           totalQuotes,
           checkTotalQuotes,
           updateSearchQuery,
+          user,
+          fetchUserData,
+          expenses,
+          fetchExpenses,
+          isModifyModalVisible,
+          modifiedExpense,
+          showModifyModal,
+          modifyExpense,
+          isDeleteModalVisible,
+          showDeleteModal,
+          hideDeleteModal,
+          expenseToDelete,
+          deleteExpense,
       };
     },
 };
@@ -423,6 +597,19 @@ body {
   background-color: rgba(0, 0, 0, 0.4);
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
 .modal-content {
   background-color: var(--color-background);
   margin: auto;
@@ -433,6 +620,15 @@ body {
   text-align: center;
   color: var(--color-text);
   font-family: var(--font-family);
+  z-index: 1001;
+}
+
+.modal-content form label,
+.modal-content form input,
+.modal-content form button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .close {
@@ -483,11 +679,30 @@ button:hover {
   max-height: 300px;
   overflow: auto;
 }
-.remove-contributor-btn {
+.remove-btn {
   background: none;
   border: none;
   color: red;
   cursor: pointer;
   margin-left: 10px;
+}
+.inline{
+  display: inline-block;
+  margin-right: 10px;
+}
+.modify-expense-btn {
+  background-color: transparent;
+  color: orange;
+  border: 2px solid orange;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 3px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.modify-expense-btn:hover {
+  background-color: orange;
+  color: white;
 }
 </style>

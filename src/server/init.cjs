@@ -2,6 +2,7 @@ const express = require('express');
 const placeholderDB = require('./placeholderDB.cjs');
 const auth = require('./auth.cjs');
 const budget = require('./budget.cjs');
+const balance = require('./balance.cjs');
 const path = require('path');
 const cors = require('cors');
 const app = express();
@@ -19,6 +20,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 app.use('/api/auth', auth);
 app.use('/api/budget', budget);
+app.use('/api/balance', balance);
 
 app.all('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, '..', '..', 'public', '404.html'));
