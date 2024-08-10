@@ -8,10 +8,9 @@ const { secretKey, verifyToken } = require('./token.cjs');
 
 router.post('/signup', async (req, res) => {
     const { username, name, surname, password } = req.body;
-    console.log('Request body: ', req.body);
-    console.log(username, name, surname, password);
 
     if (!username || !name || !surname || !password) {
+        console.log('All fields are required');
         return res.status(400).send('All fields are required');
     }
 
@@ -20,6 +19,7 @@ router.post('/signup', async (req, res) => {
 
         const existingUser = await client.collection('users').findOne({ username });
         if (existingUser) {
+            console.log('User already exists');
             return res.status(400).send('User already exists');
         }
 
@@ -35,7 +35,7 @@ router.post('/signup', async (req, res) => {
 
         res.status(201).send('User registered');
     } catch (error) {
-        console.error('Error registering user', error);
+        console.log('Error registering user', error);
         res.status(500).send('An error occurred while registering the user');
     }
 });

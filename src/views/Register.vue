@@ -40,8 +40,11 @@
           <MDBRow>
           <p>Già iscritto? <router-link to="/login" >Accedi</router-link></p>
           </MDBRow>
-          <div v-if="errorMessage" class="error-message">
+          <div v-if="errorMessage !== ''" class="error-message">
             <p>{{ errorMessage }}</p>
+          </div>
+          <div v-if="successMessage !== ''" class="success-message">
+            <p>{{ successMessage }}</p>
           </div>
         </form>
     </div>
@@ -72,15 +75,16 @@ export default {
     const password = ref("");
     const router = useRouter();
     const errorMessage = ref("");
+    const successMessage = ref("");
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
       try{
         console.log("First name: ", name.value);
         console.log("Last name: ", surname.value);
         console.log("Username: ", username.value);
         console.log("Password: ", password.value);
 
-        const response = fetch("http://localhost:3000/api/auth/signuo", {
+        const response = await fetch("http://localhost:3000/api/auth/signup", {
           method: "POST",
           credentials: "include",
           headers: {
@@ -97,8 +101,12 @@ export default {
         if (!response.ok) {
           throw new Error('Registration failed');
         }
-        error.message = '';
-        router.push('/login');
+        errorMessage.value = '';
+        successMessage.value = 'Registrazione avvenuta con successo, reindirizzamento alla pagina di login';
+        setTimeout(() => {
+          router.push('/login');
+          successMessage.value = '';
+        }, 2000);
       } catch (error) {
         errorMessage.value = 'Inserisci tutti i campi e verifica che lo username non sia già stato utilizzato';
       }
@@ -111,6 +119,7 @@ export default {
       password,
       handleRegister,
       errorMessage,
+      successMessage,
     };
   },
 };
@@ -139,6 +148,10 @@ export default {
 }
 .error-message {
   color: red;
+  margin-top: 10px;
+}
+.success-message {
+  color: green;
   margin-top: 10px;
 }
 </style>
