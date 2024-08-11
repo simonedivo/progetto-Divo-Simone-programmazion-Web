@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"node src/server/init.cjs\"",
+    "dev": "concurrently \"vite --host\" \"node src/server/init.cjs\"",
     "build": "vite build",
     "preview": "vite preview"
   },

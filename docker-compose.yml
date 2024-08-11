@@ -1,14 +1,11 @@
 services:
   app_divo_simone:
     container_name: app_divo_simone
-    #build: .
-    #command: nodemon --watch . -e js ./src/server/init.cjs
-    image: simone:latest
+    build: .
     ports:
       - "5173:5173"
       - "3000:3000"
-    #volumes:
-    #  - ./app:/var/www
+
   mongo_divo_simone:
     container_name: mongo_divo_simone
     image: mongo:latest
