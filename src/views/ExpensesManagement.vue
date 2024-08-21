@@ -23,7 +23,7 @@
                     </ul>
                 </div>
                 <div>
-                  <div v-if="activeTab === 'add'">
+                  <div v-if="activeTab === 'add'" class="center-div">
                     <h1>Inserisci i dati per una nuova spesa</h1>
                     <form @submit.prevent="confirmAddTransaction" class="form-container">
                       <div class="form-group">

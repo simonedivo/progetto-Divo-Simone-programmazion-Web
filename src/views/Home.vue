@@ -60,7 +60,7 @@
     <div v-if="isLogoutModalVisible" class="modal">
         <div class="modal-content">
             <span class="close" @click="hideLogoutModal">&times;</span>
-            <p>Sei sicuro di voler effettuare il logout?</p>0
+            <p>Sei sicuro di voler effettuare il logout?</p>
             <button @click="handleLogout">Sì</button>
             <button @click="hideLogoutModal">No</button>
         </div>
