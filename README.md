@@ -5,7 +5,7 @@ Per avviare il sito è sufficiente eseguire, dalla root del progetto, il comando
 docker compose up
 ```
 
-Successivamente bisogna connettersi all'indirizzo
+Per visualizzare il sito bisogna, successivamente, connettersi all'indirizzo
 
 ```sh
 http://localhost:5173
