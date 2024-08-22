@@ -1,29 +1,12 @@
-# app-Divo-Simone
-
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
 ## Project Setup
+Per avviare il sito è sufficiente eseguire, dalla root del progetto, il comando
 
 ```sh
-npm install
+docker compose up
 ```
 
-### Compile and Hot-Reload for Development
+Successivamente bisogna connettersi all'indirizzo
 
 ```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
+http://localhost:5173
 ```
