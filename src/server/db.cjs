@@ -1,5 +1,5 @@
 const { MongoClient } = require('mongodb');
-const uri = 'mongodb://localhost:27017/';
+const uri = 'mongodb://mongo_divo_simone:27017/';
 
 let cachedDB;
 
