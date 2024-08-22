@@ -35,6 +35,10 @@
                         <input type="text" id="description" v-model="newTransaction.description" class="form-control" required>
                       </div>
                       <div class="form-group">
+                        <label for="description">Data</label>
+                        <input type="date" id="date" v-model="transactionDate" class="form-control" required>
+                      </div>
+                      <div class="form-group">
                         <label for="cost">Importo in €</label>
                         <input type="number" id="cost" v-model="newTransaction.cost" class="form-control" required>
                       </div>
@@ -191,6 +195,7 @@ export default {
         cost: 0,
         quotes: [],
       });
+      const transactionDate = ref('');
       const user = ref({username : ''});
       const expenses = ref([]);
       const isModifyModalVisible = ref(false);
@@ -201,11 +206,11 @@ export default {
       const addTransaction = async () => {
         console.log(newTransaction.value);
         try {
-          const currentDate = new Date();
-          const currentYear = currentDate.getFullYear();
-          const currentMonth = currentDate.getMonth() + 1;
-          const currentDay = currentDate.getDate();
-          const url = 'http://localhost:3000/api/budget/'+`/${currentYear}/${currentMonth}/${currentDay}`;
+          const date = new Date(transactionDate.value);
+          const year = date.getFullYear();
+          const month = date.getMonth();
+          const day = date.getDate();
+          const url = 'http://localhost:3000/api/budget/'+`/${year}/${month}/${day}`;
           const response = await fetch(url, {
             method: 'POST',
             credentials: 'include',
@@ -450,6 +455,7 @@ export default {
           hideDeleteModal,
           expenseToDelete,
           deleteExpense,
+          transactionDate,
       };
     },
 };
